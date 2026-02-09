@@ -1,0 +1,66 @@
+<section class="experience-section" id="experience">
+  <div class="experience-container">
+    <div class="experience-left">
+      <h2 class="section-title">Experience & Education</h2>
+
+      <div class="timeline">
+        @for (item of experiences(); track item.id) {
+          <article class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="timeline-date">{{ item.dateStart }} — {{ item.dateEnd }}</span>
+              <h3 class="timeline-title">{{ item.title }}</h3>
+              <p class="timeline-company">
+                {{ item.company }}
+                @if (item.location) {
+                  <span class="timeline-location">• {{ item.location }}</span>
+                }
+              </p>
+              <p class="timeline-description">{{ item.description }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+
+    <div class="experience-right">
+      <div
+        class="terminal"
+        [class.active]="isTerminalActive()"
+        (mouseenter)="onTerminalHover(true)"
+        (mouseleave)="onTerminalHover(false)"
+        (click)="onTerminalClick()"
+      >
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-title">skills.json</span>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-line command">
+            <span class="prompt">$</span>
+            <span class="text">cat skills.json</span>
+            <span class="cursor"></span>
+          </div>
+          <div class="terminal-output" [class.visible]="isTerminalActive()">
+            <span class="bracket">&#123;</span>
+            @for (skill of skills(); track skill.name; let i = $index) {
+              <div class="skill-line" [style.animation-delay]="i * 0.1 + 's'">
+                <span class="key">"{{ skill.name }}"</span>
+                <span class="colon">:</span>
+                <span class="value">"{{ skill.level }}"</span>
+                @if (i < skills().length - 1) {
+                  <span class="comma">,</span>
+                }
+              </div>
+            }
+            <span class="bracket">&#125;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

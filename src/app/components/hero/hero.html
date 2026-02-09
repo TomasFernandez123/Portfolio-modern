@@ -1,0 +1,189 @@
+<section class="hero-section">
+  <nav class="navbar">
+    <a href="#" class="logo">DEV.</a>
+    <ul class="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button
+      class="menu-toggle"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="isMenuOpen()"
+      aria-label="Toggle menu"
+    >
+      <span class="hamburger" [class.active]="isMenuOpen()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" [class.open]="isMenuOpen()">
+    <ul class="mobile-nav-links">
+      <li><a href="#work" (click)="closeMenu()">Work</a></li>
+      <li><a href="#experience" (click)="closeMenu()">Experience</a></li>
+      <li><a href="#contact" (click)="closeMenu()">Contact</a></li>
+    </ul>
+  </div>
+
+  <div class="hero-content">
+    <span class="availability-badge">Available for new opportunities</span>
+
+    <h1 class="hero-title">
+      Building digital
+      <span class="accent">solutions</span> that scale.
+    </h1>
+
+    <p class="hero-description">
+      Software Developer and Técnico Programador from UTN specialized in Angular, NestJS, and the
+      TypeScript ecosystem. I focus on building scalable e-commerce platforms and high-performance
+      applications with a focus on clean architecture.
+    </p>
+
+    <a
+      href="/CV Tomás Fernandez-English.pdf"
+      download="CV Tomás Fernandez-English.pdf"
+      class="cta-button"
+    >
+      Download CV
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </svg>
+    </a>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="mouse">
+      <div class="wheel"></div>
+    </div>
+    <span>SCROLL</span>
+  </div>
+
+  <div class="skills-bar">
+    <div class="skill-item">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>
+      <span>Frontend</span>
+    </div>
+    <div class="skill-item">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8" />
+        <path d="M12 17v4" />
+      </svg>
+      <span>Backend</span>
+    </div>
+    <div class="skill-item">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" />
+      </svg>
+      <span>Database</span>
+    </div>
+    <div class="skill-item">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+      </svg>
+      <span>Cloud</span>
+    </div>
+    <div class="skill-item">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <path d="M12 18h.01" />
+      </svg>
+      <span>Mobile</span>
+    </div>
+    <div class="skill-item">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v4" />
+        <path d="M12 18v4" />
+        <path d="m5.2 5.2 2.8 2.8" />
+        <path d="m16 16 2.8 2.8" />
+        <path d="M2 12h4" />
+        <path d="M18 12h4" />
+        <path d="m5.2 18.8 2.8-2.8" />
+        <path d="m16 8 2.8-2.8" />
+      </svg>
+      <span>Design</span>
+    </div>
+  </div>
+</section>

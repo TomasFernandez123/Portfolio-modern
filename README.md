@@ -1,59 +1,81 @@
-# PortfolioModern
+# 🚀 Portfolio — Tomás Fernández
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
+Modern, responsive developer portfolio built with **Angular 21** and **SCSS**. Features a dark, premium UI with glassmorphism effects, smooth animations, and a fully interactive experience.
 
-## Development server
+## ✨ Features
 
-To start a local development server, run:
+- **Hero Section** — Animated landing with mobile hamburger menu and fullscreen overlay
+- **Projects Grid** — Responsive CSS Grid layout showcasing 5 projects with hover effects
+- **Experience Timeline** — Vertical timeline with an interactive terminal that displays `skills.json` on hover/click
+- **Contact Form** — Reactive form with validation and **EmailJS** integration for sending emails
+- **Fully Responsive** — Optimized for desktop, tablet, and mobile
 
-```bash
-ng serve
-```
+## 🛠️ Tech Stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+| Category  | Technology                           |
+| --------- | ------------------------------------ |
+| Framework | Angular 21 (Standalone Components)   |
+| Language  | TypeScript                           |
+| Styling   | SCSS + CSS Variables                 |
+| State     | Angular Signals                      |
+| Forms     | Reactive Forms + Validators          |
+| Email     | EmailJS                              |
+| Env Vars  | @ngx-env/builder (`import.meta.env`) |
+| Build     | Angular CLI + Vite                   |
 
-## Code scaffolding
+## 📦 Getting Started
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Prerequisites
 
-```bash
-ng generate component component-name
-```
+- Node.js 20+
+- npm 10+
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Installation
 
 ```bash
-ng test
+git clone https://github.com/TomasFernandez123/Portfolio-modern.git
+cd Portfolio-modern
+npm install
 ```
 
-## Running end-to-end tests
+### Environment Variables
 
-For end-to-end (e2e) testing, run:
+Create a `.env` file in the root directory:
+
+```env
+NG_APP_EMAILJS_PUBLIC_KEY=your_public_key
+NG_APP_EMAILJS_SERVICE_ID=your_service_id
+NG_APP_EMAILJS_TEMPLATE_ID=your_template_id
+```
+
+### Development
 
 ```bash
-ng e2e
+npm start
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Open [http://localhost:4200](http://localhost:4200).
 
-## Additional Resources
+### Production Build
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+npm run build
+```
+
+## 📁 Project Structure
+
+```
+src/app/
+├── components/
+│   ├── hero/          # Landing section + mobile nav
+│   ├── projects/      # Projects grid
+│   ├── experience/    # Timeline + interactive terminal
+│   └── contact/       # Contact form + social links
+├── app.ts             # Root component
+├── app.html           # Main template
+└── app.config.ts      # App configuration
+```
+
+## 📄 License
+
+MIT

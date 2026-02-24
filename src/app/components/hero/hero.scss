@@ -7,11 +7,26 @@
   display: flex;
   flex-direction: column;
   background: var(--color-bg-primary);
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 40%, rgba(0, 255, 240, 0.08) 0%, transparent 60%),
-    var(--color-bg-primary);
   position: relative;
   overflow: hidden;
+}
+
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(15, 15, 15, 0.35) 0%, rgba(15, 15, 15, 0.72) 100%);
 }
 
 .navbar {
@@ -20,7 +35,7 @@
   align-items: center;
   padding: 1.5rem 4rem;
   position: relative;
-  z-index: 100;
+  z-index: 10;
 
   .logo {
     font-size: 1.5rem;
@@ -131,6 +146,8 @@
   padding: 0 2rem;
   max-width: 900px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .availability-badge {
@@ -204,6 +221,7 @@
   bottom: 120px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
   color: var(--color-text-muted);
 
   .mouse {
@@ -250,6 +268,8 @@
   padding: 1.5rem 2rem;
   background: var(--color-bg-secondary);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  z-index: 2;
 }
 
 .skill-item {

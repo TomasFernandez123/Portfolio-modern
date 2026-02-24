@@ -114,24 +114,221 @@
   margin-top: 0.25rem;
 }
 
-.submit-button {
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
   padding: 1rem 2rem;
   background: var(--color-text-secondary);
   color: #0f0f0f;
   font-size: 1rem;
   font-weight: 600;
+  border: none;
   border-radius: 8px;
+  cursor: pointer;
   transition: all var(--transition-fast);
+
+  .btn-plane-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
 
   &:hover:not(:disabled) {
     background: var(--color-text-primary);
     transform: translateY(-2px);
+
+    .btn-plane-icon {
+      transform: translateX(3px) translateY(-3px) rotate(-20deg);
+    }
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+// ── Email + copy inline group ──────────────────────────────────────────────
+.email-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.copy-email-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 0.85rem;
+  background: transparent;
+  border: 1px solid #2b2b2b;
+  border-radius: 20px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-text-muted);
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &.copied {
+    border-color: #4ade80;
+    color: #4ade80;
+  }
+}
+
+// ── Form stage (relative container for plane overlay) ─────────────────────
+.form-stage {
+  position: relative;
+}
+
+.contact-form {
+  transform-origin: top center;
+
+  &.is-folding {
+    animation: formFold 0.46s cubic-bezier(0.55, 0, 0.45, 1) forwards;
+  }
+
+  &.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@keyframes formFold {
+  0%   { transform: perspective(900px) rotateX(0)     scaleY(1);   opacity: 1; }
+  70%  { transform: perspective(900px) rotateX(-75deg) scaleY(0.3); opacity: 0.3; }
+  100% { transform: perspective(900px) rotateX(-90deg) scaleY(0);   opacity: 0; }
+}
+
+// ── Paper plane overlay ───────────────────────────────────────────────────
+.plane-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 10;
+
+  .plane-svg {
+    width: 52px;
+    height: 52px;
+    filter: drop-shadow(0 0 12px rgba(0, 255, 240, 0.5));
+  }
+
+  &.launching .plane-svg {
+    animation: planePop 0.46s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  &.soaring .plane-svg {
+    animation: planeSoar 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+}
+
+@keyframes planePop {
+  from { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(1.3) rotate(-30deg); opacity: 1; }
+}
+
+@keyframes planeSoar {
+  0%   { transform: translate(-50%, -50%) scale(1.3) rotate(-30deg); opacity: 1; }
+  15%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + 260px), calc(-50% - 360px)) scale(0.2) rotate(-15deg); opacity: 0; }
+}
+
+// ── Success state ─────────────────────────────────────────────────────────
+.success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  min-height: 380px;
+  text-align: center;
+  animation: fadeInUp 0.5s 0.1s ease both;
+}
+
+.success-icon-wrap {
+  width: 72px;
+  height: 72px;
+}
+
+.success-check {
+  width: 100%;
+  height: 100%;
+}
+
+.check-circle {
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: drawStroke 0.7s ease forwards;
+}
+
+.check-mark {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: drawStroke 0.45s 0.65s ease forwards;
+}
+
+@keyframes drawStroke {
+  to { stroke-dashoffset: 0; }
+}
+
+.success-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.success-body {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.retry-btn {
+  padding: 0.65rem 1.5rem;
+  background: transparent;
+  border: 1px solid #2b2b2b;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-text-muted);
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.retry-link {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover { opacity: 0.8; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .status-message {

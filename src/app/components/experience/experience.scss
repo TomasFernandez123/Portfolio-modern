@@ -2,6 +2,7 @@
   display: block;
 }
 
+// ── Section wrapper ────────────────────────────────────────────────────────
 .experience-section {
   padding: 6rem 4rem;
   background: #151515;
@@ -14,108 +15,319 @@
   gap: 4rem;
   max-width: 1200px;
   margin: 0 auto;
-  align-items: start;
+  align-items: stretch;
 }
 
 .experience-left {
   padding-top: 1rem;
 }
 
+// ── Section title ──────────────────────────────────────────────────────────
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: 3.5rem;
+  margin-bottom: 3rem;
   letter-spacing: -0.02em;
-}
 
-.timeline {
-  position: relative;
-  padding-left: 2rem;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
-    background: var(--color-bg-tertiary);
+  .branch-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 }
 
-.timeline-item {
+// ── Git flow container ─────────────────────────────────────────────────────
+.git-flow {
+  display: flex;
+  align-items: flex-start;
+}
+
+// ── Rail: holds trunk line + "main" label ─────────────────────────────────
+.git-rail {
+  flex-shrink: 0;
+  width: 64px;
   position: relative;
-  padding-bottom: 2.5rem;
-
-  &:last-child {
-    padding-bottom: 0;
-  }
+  align-self: stretch; // stretches to full height of the flex row
 }
 
-.timeline-dot {
-  position: absolute;
-  left: -2rem;
-  top: 6px;
-  width: 12px;
-  height: 12px;
-  background: var(--color-accent);
-  border-radius: 50%;
-  transform: translateX(calc(-50% + 6px));
-  box-shadow:
-    0 0 0 4px #151515,
-    0 0 12px rgba(0, 255, 240, 0.4);
-}
-
-.timeline-content {
-  padding-left: 0.5rem;
-}
-
-.timeline-date {
-  display: inline-block;
-  font-size: 0.75rem;
+.git-main-label {
+  display: block;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 9px;
   font-weight: 600;
   color: var(--color-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.4rem;
+  opacity: 0.5;
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding-top: 2px;
+  position: relative;
+  z-index: 1;
 }
 
-.timeline-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 0.2rem;
-  letter-spacing: -0.01em;
+.git-trunk-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 20px;
+  width: 2px;
+  height: 0; // animated by GSAP to 100%
+  background: var(--color-accent);
+  opacity: 0.35;
 }
 
-.timeline-company {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  margin-bottom: 0.5rem;
+// ── Cards column ───────────────────────────────────────────────────────────
+.git-cards-col {
+  flex: 1;
+  min-width: 0;
 }
 
-.timeline-location {
-  color: var(--color-text-muted);
+// Each slot: positions the commit node circle via relative child
+.git-card-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 0 1.25rem 1.5rem;
 }
 
-.timeline-description {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  line-height: 1.6;
-  max-width: 450px;
-}
-
-.experience-right {
+// ── Commit node circle (inline span) ──────────────────────────────────────
+.git-node {
+  position: absolute;
+  left: calc(-64px / 2 - 8px); // center in the 64px rail, offset by half circle width
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #151515;
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 0 8px rgba(0, 255, 240, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 4rem;
+  z-index: 2;
+
+  // Inner dot
+  &::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  // Horizontal branch line (from node right edge to card)
+  &::before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.5rem;
+    height: 1.5px;
+    background: var(--color-accent);
+    opacity: 0.45;
+  }
+}
+
+// Education items use purple
+.git-card-slot[data-type='education'] .git-node {
+  border-color: #a78bfa;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
+
+  &::after { background: #a78bfa; }
+  &::before { background: #a78bfa; }
+}
+
+// Hash label above the node
+.git-hash {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 8px;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.git-card {
+  position: relative;
+  width: 100%;
+  padding: 1.5rem;
+  background: rgba(26, 26, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  cursor: default;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &:hover {
+    border-color: rgba(0, 255, 240, 0.2);
+    box-shadow: 0 0 24px rgba(0, 255, 240, 0.06);
+  }
+}
+
+.card-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.branch-name {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: rgba(0, 255, 240, 0.08);
+  border: 1px solid rgba(0, 255, 240, 0.2);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.card-date {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.2rem;
+}
+
+.card-company {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.card-location {
+  opacity: 0.7;
+}
+
+.card-description {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+}
+
+// ── Code tooltip ───────────────────────────────────────────────────────────
+.code-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 1rem;
+  z-index: 50;
+  min-width: 280px;
+  max-width: 360px;
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 255, 240, 0.08);
+  animation: tooltip-in 0.15s ease;
+  pointer-events: none;
+
+  // Arrow
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 1.5rem;
+    border: 6px solid transparent;
+    border-top-color: #0d1117;
+  }
+}
+
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tooltip-prompt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.tooltip-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tooltip-line {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.18rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+}
+
+.t-prompt {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.t-cmd {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  word-break: break-all;
+}
+
+.experience-right {
+  position: relative;
 }
 
 .terminal {
+  position: absolute;
+  top: 4rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   max-width: 420px;
+  display: flex;
+  flex-direction: column;
   background: rgba(26, 26, 26, 0.6);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -168,98 +380,114 @@
 }
 
 .terminal-body {
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  line-height: 1.65;
+  scroll-behavior: smooth;
+
+  // Thin scrollbar
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
 }
 
-.terminal-line {
+// ── Term line variants ─────────────────────────────────────────────────────
+.term-line {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-height: 1.3em;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding: 0.05rem 0;
+}
 
-  .prompt {
-    color: var(--color-accent);
-    font-weight: 600;
-  }
+.term-cmd    { color: var(--color-text-primary); }
+.term-out    { color: var(--color-text-muted); padding-left: 0.5rem; }
+.term-success{ color: #4ade80; padding-left: 0.5rem; }
+.term-dim    { color: rgba(255,255,255,0.28); padding-left: 0.5rem; }
+.term-accent { color: var(--color-accent); padding-left: 0.5rem; }
+.term-error  { color: #f87171; padding-left: 0.5rem; }
 
-  .text {
-    color: var(--color-text-primary);
-  }
+.t-prompt {
+  color: var(--color-accent);
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
 
-  .cursor {
-    width: 8px;
-    height: 16px;
-    background: var(--color-accent);
-    animation: blink 1s infinite;
-  }
+// ── Cursor ─────────────────────────────────────────────────────────────────
+.term-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  background: var(--color-accent);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+  flex-shrink: 0;
 }
 
 @keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
-.terminal-output {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: all 0.4s ease;
-
-  &.visible {
-    opacity: 1;
-    max-height: 300px;
-  }
-
-  .bracket {
-    color: var(--color-text-muted);
-    display: block;
-  }
+// ── Interactive input line ───────────────────────────────────────────────
+.term-input-line {
+  align-items: center;
+  margin-top: 0.1rem;
 }
 
-.skill-line {
-  padding-left: 1.5rem;
-  opacity: 0;
-  transform: translateY(-5px);
+.term-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: inherit;
+  caret-color: var(--color-accent);
+  width: 100%;
+  min-width: 0;
 
-  .terminal-output.visible & {
-    animation: fadeInUp 0.3s forwards;
-  }
-
-  .key {
-    color: #7dd3fc;
-  }
-
-  .colon {
-    color: var(--color-text-muted);
-    margin: 0 0.25rem;
-  }
-
-  .value {
-    color: var(--color-accent);
-    letter-spacing: 0.05em;
-  }
-
-  .comma {
-    color: var(--color-text-muted);
-  }
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  &::placeholder {
+    color: rgba(255,255,255,0.18);
   }
 }
 
 @media (max-width: 1024px) {
+  .experience-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .experience-right {
+    position: static;
+    padding-top: 0;
+  }
+
+  .terminal {
+    position: static;
+    max-width: 100%;
+    flex: none;
+  }
+
+  .terminal-body {
+    flex: none;
+    max-height: 340px;
+  }
+}
+
+@media (max-width: 768px) {
+  .experience-section {
+    padding: 3rem 1.5rem;
+  }
+
   .experience-container {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -272,43 +500,51 @@
 
   .terminal {
     max-width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .experience-section {
-    padding: 3rem 1.5rem;
+    cursor: pointer;
   }
 
   .section-title {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
+    font-size: 1.75rem;
   }
 
-  .timeline {
-    padding-left: 1.5rem;
+  .git-rail {
+    width: 48px;
   }
 
-  .timeline-dot {
-    left: -1.5rem;
+  .git-card-slot {
+    min-height: 160px;
+    padding-left: 1rem;
   }
 
-  .timeline-item {
-    padding-bottom: 2rem;
+  .card-title {
+    font-size: 0.95rem;
   }
 
-  .timeline-title {
-    font-size: 1.1rem;
-  }
-
-  .timeline-description {
-    font-size: 0.8rem;
+  .card-description {
+    font-size: 0.78rem;
   }
 
   .terminal-body {
     font-size: 0.75rem;
   }
 
-  .terminal {
-    cursor: pointer;
+  // Tooltip: inline in card on mobile (no absolute positioning, no stacking context issues)
+  .git-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .code-tooltip {
+    position: static;
+    min-width: auto;
+    max-width: 100%;
+    margin-top: 1rem;
+    box-shadow: none;
+    border-color: rgba(0, 255, 240, 0.2);
+
+    &::after {
+      display: none;
+    }
   }
 }

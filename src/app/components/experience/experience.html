@@ -1,64 +1,129 @@
-<section class="experience-section" id="experience">
+<section class="experience-section" id="experience" #experienceSection>
   <div class="experience-container">
     <div class="experience-left">
-      <h2 class="section-title">Experience & Education</h2>
+      <h2 class="section-title">
+        <svg class="branch-icon" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="6" y1="3" x2="6" y2="15"/>
+          <circle cx="18" cy="6" r="3"/>
+          <circle cx="6" cy="18" r="3"/>
+          <path d="M18 9a9 9 0 0 1-9 9"/>
+        </svg>
+        Experience & Education
+      </h2>
 
-      <div class="timeline">
-        @for (item of experiences(); track item.id) {
-          <article class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <span class="timeline-date">{{ item.dateStart }} — {{ item.dateEnd }}</span>
-              <h3 class="timeline-title">{{ item.title }}</h3>
-              <p class="timeline-company">
-                {{ item.company }}
-                @if (item.location) {
-                  <span class="timeline-location">• {{ item.location }}</span>
+      <div class="git-flow">
+        <!-- Rail: trunk line + "main" label -->
+        <div class="git-rail">
+          <span class="git-main-label">main</span>
+          <div class="git-trunk-line" #trunkLine></div>
+        </div>
+
+        <!-- Cards column -->
+        <div class="git-cards-col">
+          @for (item of experiences(); track item.id; let i = $index) {
+            <div class="git-card-slot" [attr.data-type]="item.type">
+              <!-- Commit node circle + hash label -->
+              <span class="git-node">
+                <span class="git-hash">{{ item.commitHash }}</span>
+              </span>
+              <article class="git-card"
+                (mouseenter)="setActiveTooltip(item.id)"
+                (mouseleave)="setActiveTooltip(null)"
+                (click)="setActiveTooltip(activeTooltip() === item.id ? null : item.id)">
+
+                <div class="card-meta">
+                  <span class="branch-name">{{ item.branchName }}</span>
+                  <span class="card-date">{{ item.dateStart }} — {{ item.dateEnd }}</span>
+                </div>
+
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-company">
+                  {{ item.company }}
+                  <span class="card-location">· {{ item.location }}</span>
+                </p>
+                <p class="card-description">{{ item.description }}</p>
+
+                <!-- Code tooltip — appears on hover -->
+                @if (activeTooltip() === item.id) {
+                  <div class="code-tooltip">
+                    <div class="tooltip-header">
+                      <span class="tooltip-prompt-dot"></span>
+                      <span class="tooltip-label">commands used here</span>
+                    </div>
+                    @for (cmd of item.commands; track cmd) {
+                      <div class="tooltip-line">
+                        <span class="t-prompt">$</span>
+                        <span class="t-cmd">{{ cmd }}</span>
+                      </div>
+                    }
+                  </div>
                 }
-              </p>
-              <p class="timeline-description">{{ item.description }}</p>
+
+              </article>
             </div>
-          </article>
-        }
+          }
+        </div>
       </div>
     </div>
 
     <div class="experience-right">
-      <div
-        class="terminal"
-        [class.active]="isTerminalActive()"
-        (mouseenter)="onTerminalHover(true)"
-        (mouseleave)="onTerminalHover(false)"
-        (click)="onTerminalClick()"
-      >
+      <div class="terminal" (click)="focusInput()">
         <div class="terminal-header">
           <div class="terminal-dots">
             <span class="dot red"></span>
             <span class="dot yellow"></span>
             <span class="dot green"></span>
           </div>
-          <span class="terminal-title">skills.json</span>
+          <span class="terminal-title">tomas&#64;portfolio:~</span>
         </div>
-        <div class="terminal-body">
-          <div class="terminal-line command">
-            <span class="prompt">$</span>
-            <span class="text">cat skills.json</span>
-            <span class="cursor"></span>
-          </div>
-          <div class="terminal-output" [class.visible]="isTerminalActive()">
-            <span class="bracket">&#123;</span>
-            @for (skill of skills(); track skill.name; let i = $index) {
-              <div class="skill-line" [style.animation-delay]="i * 0.1 + 's'">
-                <span class="key">"{{ skill.name }}"</span>
-                <span class="colon">:</span>
-                <span class="value">"{{ skill.level }}"</span>
-                @if (i < skills().length - 1) {
-                  <span class="comma">,</span>
-                }
-              </div>
-            }
-            <span class="bracket">&#125;</span>
-          </div>
+        <div class="terminal-body" #termBody>
+
+          <!-- Past output lines -->
+          @for (line of terminalLines(); track line.id) {
+            <div [class]="'term-line term-' + line.type">
+              @if (line.type === 'cmd') { <span class="t-prompt">$</span> }
+              <span>{{ line.text }}</span>
+            </div>
+          }
+
+          <!-- Typing animation (boot sequence) -->
+          @if (typingText() !== null) {
+            <div class="term-line term-cmd">
+              <span class="t-prompt">$</span>
+              <span>{{ typingText() }}</span><span class="term-cursor"></span>
+            </div>
+          }
+
+          <!-- Interactive input line -->
+          @if (showInput()) {
+            <div class="term-line term-input-line">
+              <span class="t-prompt">$</span>
+              <input
+                #termInput
+                class="term-input"
+                [value]="userInput()"
+                (input)="userInput.set($any($event.target).value)"
+                (keydown.enter)="submitCommand()"
+                (keydown.ArrowUp)="historyUp()"
+                (focus)="isInputFocused.set(true)"
+                (blur)="isInputFocused.set(false)"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                placeholder="type a command..."
+              />
+              @if (!isInputFocused()) {
+                <span class="term-cursor" aria-hidden="true"></span>
+              }
+            </div>
+          }
+
+          <!-- Idle state before boot (no blinking line at start) -->
+          @if (!showInput() && typingText() === null && terminalLines().length === 0) {
+            <div class="term-line term-dim">Initializing...</div>
+          }
+
         </div>
       </div>
     </div>

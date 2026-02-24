@@ -111,9 +111,6 @@ export class Projects implements OnDestroy {
     if (!track || !wrapper) return;
 
     this.ngZone.runOutsideAngular(() => {
-      // Normalize scroll for iOS Safari address-bar resize issues
-      ScrollTrigger.normalizeScroll(true);
-
       gsap.set('.slide-bg-text', { x: 0 });
 
       const getXDelta = () => -(track.scrollWidth - window.innerWidth);

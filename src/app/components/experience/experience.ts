@@ -221,12 +221,24 @@ export class Experience implements OnDestroy {
   }
 
   private initGitAnimation(): void {
-    if (window.innerWidth < 768) return;
     const section = this.sectionRef()?.nativeElement;
     const trunkLine = this.trunkLineRef()?.nativeElement;
-    if (!section || !trunkLine) return;
+    if (!section) return;
+
+    const isMobile = window.innerWidth < 768;
 
     this.ngZone.runOutsideAngular(() => {
+      // Terminal boot sequence — runs on ALL screen sizes
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 60%',
+        once: true,
+        onEnter: () => this.ngZone.run(() => void this.runBootSequence()),
+      });
+
+      // Git-flow visual animations — desktop only (need trunkLine + enough width)
+      if (isMobile || !trunkLine) return;
+
       // Animate trunk div height from 0 → 100% — always matches real content height
       gsap.set(trunkLine, { height: 0 });
       gsap.to(trunkLine, {
@@ -242,7 +254,7 @@ export class Experience implements OnDestroy {
 
       // Pop-in commit node circles
       const nodes = section.querySelectorAll<HTMLElement>('.git-node');
-      nodes.forEach((node, i) => {
+      nodes.forEach((node) => {
         gsap.set(node, { opacity: 0, scale: 0.2 });
         ScrollTrigger.create({
           trigger: node,
@@ -264,14 +276,6 @@ export class Experience implements OnDestroy {
           onEnter: () =>
             gsap.to(card, { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out' }),
         });
-      });
-
-      // Terminal boot sequence
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top 55%',
-        once: true,
-        onEnter: () => this.ngZone.run(() => void this.runBootSequence()),
       });
     });
   }

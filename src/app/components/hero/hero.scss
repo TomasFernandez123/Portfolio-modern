@@ -34,8 +34,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 4rem;
-  position: relative;
-  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
 
   .logo {
     font-size: 1.5rem;
@@ -64,7 +67,12 @@
 
 .menu-toggle {
   display: none;
+  position: relative;
   z-index: 101;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
 }
 
 .hamburger {

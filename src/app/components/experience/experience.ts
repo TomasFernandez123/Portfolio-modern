@@ -142,7 +142,7 @@ export class Experience implements OnDestroy {
       branchName: 'feat/angelite-platform',
       commitHash: 'a3f8d12',
       description:
-        'Designing and developing REST APIs with NestJS and MongoDB. Implementing payment gateways, shipping rate calculations, and cloud-based media management. Building a modular, responsive frontend with Angular.',
+        'Designing and developing REST APIs with <strong>NestJS</strong> and <strong>MongoDB</strong>. Implementing payment gateways, shipping rate calculations, and cloud-based media management. Building a modular, responsive frontend with <strong>Angular</strong>.',
       commands: [
         'nest new angelite-api --strict',
         'docker-compose up -d mongodb redis',
@@ -161,7 +161,7 @@ export class Experience implements OnDestroy {
       branchName: 'feat/mantecapp-mobile',
       commitHash: 'c91be47',
       description:
-        'Led an agile development team using Scrum and GitHub workflows. Developed a mobile management app with Flutter and a web dashboard with Angular, integrating real-time push notifications.',
+        'Led an agile development team using <strong>Scrum</strong> and GitHub workflows. Developed a mobile management app with <strong>Flutter</strong> and a web dashboard with <strong>Angular</strong>, integrating real-time push notifications.',
       commands: [
         'flutter pub add supabase_flutter',
         'git flow feature start push-notifs',
@@ -180,7 +180,7 @@ export class Experience implements OnDestroy {
       branchName: 'edu/utn-degree',
       commitHash: 'f204c08',
       description:
-        'Specialized in Software Development (OOP), Database Management (SQL/NoSQL), and Agile Methodologies. Graduated in December 2025.',
+        'Specialized in Software Development (<strong>OOP</strong>), Database Management (<strong>SQL/NoSQL</strong>), and <strong>Agile Methodologies</strong>. Graduated in December 2025.',
       commands: [
         'git checkout -b edu/utn-degree',
         'mvn compile -Dmaven.test.skip=false',

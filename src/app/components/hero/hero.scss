@@ -225,10 +225,8 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  position: absolute;
-  bottom: 120px;
-  left: 50%;
-  transform: translateX(-50%);
+  align-self: center;
+  padding-bottom: 2rem;
   z-index: 2;
   color: var(--color-text-muted);
 
@@ -303,6 +301,13 @@
 @media (max-width: 768px) {
   .navbar {
     padding: 1.25rem 1.5rem;
+    transition: background var(--transition-fast), backdrop-filter var(--transition-fast);
+
+    &.scrolled {
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
 
     .nav-links {
       display: none;
@@ -327,8 +332,7 @@
   }
 
   .scroll-indicator {
-    bottom: 140px;
-    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
   }
 
   .skills-bar {

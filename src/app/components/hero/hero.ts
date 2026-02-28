@@ -31,6 +31,7 @@ export class Hero implements OnDestroy {
   private document = inject(DOCUMENT);
   private ngZone = inject(NgZone);
   protected isMenuOpen = signal(false);
+  protected isScrolled = signal(false);
 
   private canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('threeCanvas');
 
@@ -182,6 +183,10 @@ export class Hero implements OnDestroy {
     const section = this.canvasRef()?.nativeElement?.closest('.hero-section') as HTMLElement;
     if (!section) return;
     this.scrollProgress = Math.min(1, window.scrollY / section.clientHeight);
+    const scrolled = window.scrollY > 10;
+    if (scrolled !== this.isScrolled()) {
+      this.ngZone.run(() => this.isScrolled.set(scrolled));
+    }
   };
 
   private onResize = (): void => {

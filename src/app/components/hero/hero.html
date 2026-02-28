@@ -2,7 +2,7 @@
   <canvas #threeCanvas class="hero-canvas"></canvas>
   <div class="hero-overlay"></div>
 
-  <nav class="navbar">
+  <nav class="navbar" [class.scrolled]="isScrolled()">
     <a href="#" class="logo">DEV.</a>
     <ul class="nav-links">
       <li><a href="#work">Work</a></li>

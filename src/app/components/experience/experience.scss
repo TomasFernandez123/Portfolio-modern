@@ -199,7 +199,7 @@
 .card-date {
   font-size: 0.72rem;
   font-weight: 500;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.62);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -226,6 +226,11 @@
   font-size: 0.82rem;
   color: var(--color-text-muted);
   line-height: 1.65;
+
+  strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
 }
 
 // ── Code tooltip ───────────────────────────────────────────────────────────
@@ -509,12 +514,24 @@
   }
 
   .git-rail {
-    width: 48px;
+    width: 20px;
+  }
+
+  .git-hash {
+    display: none;
+  }
+
+  .git-node {
+    left: calc(-20px / 2 - 8px);
   }
 
   .git-card-slot {
-    min-height: 160px;
-    padding-left: 1rem;
+    min-height: unset;
+    padding-left: 0.75rem;
+  }
+
+  .git-card {
+    padding: 1rem;
   }
 
   .card-title {
@@ -523,6 +540,7 @@
 
   .card-description {
     font-size: 0.78rem;
+    line-height: 1.6;
   }
 
   .terminal-body {

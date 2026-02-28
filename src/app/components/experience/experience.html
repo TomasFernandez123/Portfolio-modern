@@ -42,7 +42,7 @@
                   {{ item.company }}
                   <span class="card-location">· {{ item.location }}</span>
                 </p>
-                <p class="card-description">{{ item.description }}</p>
+                <p class="card-description" [innerHTML]="item.description"></p>
 
                 <!-- Code tooltip — appears on hover -->
                 @if (activeTooltip() === item.id) {

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
   --color-bg-primary: #0f0f0f;
@@ -13,6 +13,7 @@
   --color-accent: #00fff0;
 
   --font-family: 'Outfit', sans-serif;
+  --font-mono: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;

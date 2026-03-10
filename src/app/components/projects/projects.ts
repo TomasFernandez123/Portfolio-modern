@@ -2,6 +2,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   signal,
+  computed,
   viewChild,
   ElementRef,
   NgZone,
@@ -9,6 +10,8 @@ import {
   afterNextRender,
   inject,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -26,17 +29,47 @@ interface Project {
   linkIcon: 'external' | 'github' | 'demo' | 'download' | 'docs';
 }
 
+export interface ChatMessage {
+  id: number;
+  role: 'user' | 'ai';
+  text: string;
+  timestamp: Date;
+}
+
 @Component({
   selector: 'app-projects',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './projects.html',
   styleUrl: './projects.scss',
+  imports: [FormsModule],
   host: { class: 'projects' },
 })
 export class Projects implements OnDestroy {
-  private ngZone = inject(NgZone);
-  private trackRef = viewChild<ElementRef<HTMLElement>>('projectsTrack');
-  private wrapperRef = viewChild<ElementRef<HTMLElement>>('trackWrapper');
+  private ngZone  = inject(NgZone);
+  private http    = inject(HttpClient);
+  private trackRef    = viewChild<ElementRef<HTMLElement>>('projectsTrack');
+  private wrapperRef  = viewChild<ElementRef<HTMLElement>>('trackWrapper');
+  private chatBallRef = viewChild<ElementRef<HTMLElement>>('chatBall');
+
+  private readonly API = 'https://chatbot-1-nt84.onrender.com/chat';
+
+  // ── Chat state ──────────────────────────────────────────────────────────────
+  readonly chatVisible   = signal(false);
+  readonly chatExpanded  = signal(false);
+  readonly ballHidden    = signal(false);
+  readonly activeChatId  = signal<number | null>(null);
+  readonly chatMessages  = signal<ChatMessage[]>([]);
+  readonly userInput     = signal('');
+  readonly isTyping      = signal(false);
+  private msgCounter = 0;
+
+  readonly activeChatProject = computed(() =>
+    this.projects().find(p => p.id === this.activeChatId())
+  );
+
+  // ── Holds the initial ball position (set via JS before GSAP runs) ──────────
+  readonly ballLeft = signal(0);
+  readonly ballTop  = signal(0);
 
   protected readonly projects = signal<Project[]>([
     {
@@ -109,6 +142,134 @@ export class Projects implements OnDestroy {
 
   totalLabel(): string {
     return String(this.projects().length).padStart(2, '0');
+  }
+
+  // ── Chat methods ────────────────────────────────────────────────────────────
+  openChat(projectId: number, event: MouseEvent): void {
+    event.stopPropagation();
+    const btn = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    const ballSize = 52;
+    const cx = rect.left + rect.width / 2 - ballSize / 2;
+    const cy = rect.top  + rect.height / 2 - ballSize / 2;
+
+    // Reset state
+    this.activeChatId.set(projectId);
+    this.chatMessages.set([{
+      id: ++this.msgCounter,
+      role: 'ai',
+      text: `Hi! I'm the AI assistant for **${this.projects().find(p => p.id === projectId)?.title}**. Ask me anything about the architecture, stack, or implementation.`,
+      timestamp: new Date(),
+    }]);
+    this.userInput.set('');
+    this.ballHidden.set(false);
+    this.chatExpanded.set(false);
+    this.ballLeft.set(cx);
+    this.ballTop.set(cy);
+    this.chatVisible.set(true);
+
+    // Animate ball → corner, then expand panel
+    this.ngZone.runOutsideAngular(() => {
+      requestAnimationFrame(() => {
+        const ball = this.chatBallRef()?.nativeElement;
+        if (!ball) return;
+
+        const panelW = Math.min(400, window.innerWidth - 32);
+        const panelH = 540;
+        const marginR = 24;
+        const marginB = 24;
+
+        // Final ball resting position = bottom-right corner of future panel
+        const targetLeft = window.innerWidth  - marginR - panelW  + panelW / 2  - ballSize / 2;
+        const targetTop  = window.innerHeight - marginB - panelH  + panelH / 2  - ballSize / 2;
+
+        gsap.fromTo(ball,
+          { left: cx, top: cy, scale: 1, opacity: 1 },
+          {
+            left: targetLeft,
+            top: targetTop,
+            scale: 1,
+            duration: 0.55,
+            ease: 'power3.inOut',
+            onComplete: () => {
+              this.ngZone.run(() => {
+                this.ballHidden.set(true);
+                this.chatExpanded.set(true);
+              });
+            },
+          }
+        );
+      });
+    });
+  }
+
+  closeChat(): void {
+    this.chatExpanded.set(false);
+    // Wait for CSS collapse transition, then unmount
+    setTimeout(() => {
+      this.chatVisible.set(false);
+      this.activeChatId.set(null);
+    }, 360);
+  }
+
+  sendMessage(text: string): void {
+    const trimmed = text.trim();
+    if (!trimmed || this.isTyping()) return;
+
+    this.chatMessages.update(msgs => [...msgs, {
+      id: ++this.msgCounter,
+      role: 'user',
+      text: trimmed,
+      timestamp: new Date(),
+    }]);
+    this.userInput.set('');
+    this.isTyping.set(true);
+
+    const project = this.activeChatProject()!;
+    const context = [
+      `# ${project.title}`,
+      `Stack: ${project.tags.join(', ')}`,
+      `Description: ${project.description}`,
+      `Link: ${project.link}`,
+    ].join('\n');
+
+    const slug = project.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+    this.http.post<{ answer: string; timestamp: string }>(this.API, {
+      message: trimmed,
+      context,
+      project: slug,
+    }).subscribe({
+      next: (res) => {
+        this.ngZone.run(() => {
+          this.isTyping.set(false);
+          this.chatMessages.update(msgs => [...msgs, {
+            id: ++this.msgCounter,
+            role: 'ai',
+            text: res.answer,
+            timestamp: new Date(res.timestamp),
+          }]);
+        });
+      },
+      error: () => {
+        this.ngZone.run(() => {
+          this.isTyping.set(false);
+          this.chatMessages.update(msgs => [...msgs, {
+            id: ++this.msgCounter,
+            role: 'ai',
+            text: 'Error connecting to the AI — please try again.',
+            timestamp: new Date(),
+          }]);
+        });
+      },
+    });
+  }
+
+  onInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey && !this.isTyping()) {
+      event.preventDefault();
+      this.sendMessage(this.userInput());
+    }
   }
 
   private initScrollTrigger(): void {

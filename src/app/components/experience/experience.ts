@@ -75,9 +75,9 @@ export class Experience implements OnDestroy {
   private readonly COMMANDS: Record<string, () => TerminalLine[]> = {
     ls: () => [
       this.mkLine('dim', 'projects/'),
-      this.mkLine('accent', '  angelite-platform/   mantecapp/'),
-      this.mkLine('accent', '  nexora/               arcadia-sala-juegos/'),
-      this.mkLine('accent', '  note-flow/'),
+      this.mkLine('accent', '  angelite-platform/   syncro/'),
+      this.mkLine('accent', '  mantecapp/            nexora/'),
+      this.mkLine('accent', '  arcadia-sala-juegos/'),
     ],
     whoami: () => [
       this.mkLine('success', 'tomás fernandez'),
@@ -90,6 +90,7 @@ export class Experience implements OnDestroy {
     ],
     'git log': () => [
       this.mkLine('accent', 'a3f8d12 feat: angelite e-commerce platform'),
+      this.mkLine('accent', 'b72e391 feat: syncro saas multi-tenant'),
       this.mkLine('accent', 'c91be47 feat: mantecapp mobile app'),
       this.mkLine('accent', 'f204c08 tag: v1.0.0 utn-graduation'),
     ],

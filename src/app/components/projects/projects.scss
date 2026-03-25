@@ -664,6 +664,49 @@
   }
 }
 
+// ── Cancel button (visible during streaming) ──────────────────────────────────
+.ai-panel__cancel {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: rgba(248, 81, 73, 0.15);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f85149;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+
+  &:hover {
+    background: rgba(248, 81, 73, 0.28);
+    border-color: #f85149;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+}
+
+// ── Streaming cursor (blinking | at end of message) ───────────────────────────
+.ai-msg--streaming .ai-msg__bubble::after {
+  content: '|';
+  display: inline-block;
+  margin-left: 1px;
+  color: var(--color-accent);
+  animation: blink-cursor 0.8s step-end infinite;
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 // ── Swipe hint (mobile only) ─────────────────────────────────────────────────
 .swipe-hint-mobile {
   display: none;

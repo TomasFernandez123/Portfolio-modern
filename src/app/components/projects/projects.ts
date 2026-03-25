@@ -11,7 +11,6 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -46,12 +45,13 @@ export interface ChatMessage {
 })
 export class Projects implements OnDestroy {
   private ngZone  = inject(NgZone);
-  private http    = inject(HttpClient);
   private trackRef    = viewChild<ElementRef<HTMLElement>>('projectsTrack');
   private wrapperRef  = viewChild<ElementRef<HTMLElement>>('trackWrapper');
   private chatBallRef = viewChild<ElementRef<HTMLElement>>('chatBall');
+  private msgContainerRef = viewChild<ElementRef<HTMLElement>>('msgContainer');
 
   private readonly API = 'https://chatbot-1-nt84.onrender.com/chat';
+  private readonly TIMEOUT_MS = 120_000;
 
   // ── Chat state ──────────────────────────────────────────────────────────────
   readonly chatVisible   = signal(false);
@@ -61,7 +61,11 @@ export class Projects implements OnDestroy {
   readonly chatMessages  = signal<ChatMessage[]>([]);
   readonly userInput     = signal('');
   readonly isTyping      = signal(false);
-  private msgCounter = 0;
+  readonly isStreaming    = signal(false);
+  private msgCounter     = 0;
+  private streamingMsgId: number | null = null;
+  private abortCtrl: AbortController | null = null;
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly activeChatProject = computed(() =>
     this.projects().find(p => p.id === this.activeChatId())
@@ -195,6 +199,8 @@ export class Projects implements OnDestroy {
               this.ngZone.run(() => {
                 this.ballHidden.set(true);
                 this.chatExpanded.set(true);
+                // Bloquear el scroll de la página
+                document.documentElement.style.overflow = 'hidden';
               });
             },
           }
@@ -204,7 +210,11 @@ export class Projects implements OnDestroy {
   }
 
   closeChat(): void {
+    this.cancelStream();
     this.chatExpanded.set(false);
+    // Rehabilitar el scroll
+    document.documentElement.style.overflow = '';
+    
     // Wait for CSS collapse transition, then unmount
     setTimeout(() => {
       this.chatVisible.set(false);
@@ -224,6 +234,7 @@ export class Projects implements OnDestroy {
     }]);
     this.userInput.set('');
     this.isTyping.set(true);
+    this.scrollToBottom();
 
     const project = this.activeChatProject()!;
     const context = [
@@ -235,34 +246,156 @@ export class Projects implements OnDestroy {
 
     const slug = project.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-    this.http.post<{ answer: string; timestamp: string }>(this.API, {
-      message: trimmed,
-      context,
-      project: slug,
-    }).subscribe({
-      next: (res) => {
-        this.ngZone.run(() => {
-          this.isTyping.set(false);
-          this.chatMessages.update(msgs => [...msgs, {
-            id: ++this.msgCounter,
-            role: 'ai',
-            text: res.answer,
-            timestamp: new Date(res.timestamp),
-          }]);
+    // Create empty AI bubble — will be filled token by token during streaming
+    const aiMsgId = ++this.msgCounter;
+    this.streamingMsgId = aiMsgId;
+    this.chatMessages.update(msgs => [...msgs, {
+      id: aiMsgId,
+      role: 'ai',
+      text: '',
+      timestamp: new Date(),
+    }]);
+
+    this.abortCtrl = new AbortController();
+    this.timeoutId = setTimeout(() => this.abortCtrl?.abort(), this.TIMEOUT_MS);
+
+    this.ngZone.runOutsideAngular(() => {
+      fetch(this.API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/x-ndjson',
+        },
+        body: JSON.stringify({ message: trimmed, context, project: slug }),
+        signal: this.abortCtrl!.signal,
+      })
+        .then(async (response) => {
+          // If the response is not ndjson, fall back to classic JSON
+          const contentType = response.headers.get('content-type') ?? '';
+          if (!contentType.includes('ndjson') && !contentType.includes('x-ndjson')) {
+            return this.handleClassicResponse(response, aiMsgId);
+          }
+
+          this.ngZone.run(() => this.isStreaming.set(true));
+
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? ''; // keep incomplete last line
+
+            for (const raw of lines) {
+              const line = raw.trim();
+              if (!line) continue;
+
+              let parsed: { type: string; token?: string; text?: string; answer?: string; timestamp?: string } | null = null;
+              try {
+                parsed = JSON.parse(line);
+              } catch {
+                // Fallback: treat entire response body as plain text answer
+                this.ngZone.run(() => this.finalizeStreamingMsg(aiMsgId, line));
+                return;
+              }
+
+              if (!parsed) continue;
+
+              const tokenText = parsed.text ?? parsed.token;
+              if (parsed.type === 'token' && tokenText) {
+                this.ngZone.run(() => {
+                  this.chatMessages.update(msgs =>
+                    msgs.map(m => m.id === aiMsgId
+                      ? { ...m, text: m.text + tokenText }
+                      : m
+                    )
+                  );
+                  this.scrollToBottom();
+                });
+              } else if (parsed.type === 'done') {
+                this.ngZone.run(() => this.finalizeStreamingMsg(aiMsgId));
+                return;
+              } else if (parsed.type === 'error') {
+                this.ngZone.run(() => this.setStreamingError(aiMsgId, 'The AI returned an error — please try again.'));
+                return;
+              }
+            }
+          }
+
+          // Stream ended without explicit 'done'
+          this.ngZone.run(() => this.finalizeStreamingMsg(aiMsgId));
+        })
+        .catch((err: Error) => {
+          if (err.name === 'AbortError') {
+            // User cancelled or timeout — leave whatever text arrived
+            this.ngZone.run(() => this.finalizeStreamingMsg(aiMsgId));
+          } else {
+            this.ngZone.run(() => this.setStreamingError(aiMsgId, 'Error connecting to the AI — please try again.'));
+          }
         });
-      },
-      error: () => {
-        this.ngZone.run(() => {
-          this.isTyping.set(false);
-          this.chatMessages.update(msgs => [...msgs, {
-            id: ++this.msgCounter,
-            role: 'ai',
-            text: 'Error connecting to the AI — please try again.',
-            timestamp: new Date(),
-          }]);
-        });
-      },
     });
+  }
+
+  cancelStream(): void {
+    this.abortCtrl?.abort();
+  }
+
+  private finalizeStreamingMsg(aiMsgId: number, overrideText?: string): void {
+    if (overrideText !== undefined) {
+      this.chatMessages.update(msgs =>
+        msgs.map(m => m.id === aiMsgId ? { ...m, text: overrideText } : m)
+      );
+    }
+    // If the bubble is still empty after stream finishes, show a generic error
+    const msg = this.chatMessages().find(m => m.id === aiMsgId);
+    if (msg?.text.trim() === '') {
+      this.chatMessages.update(msgs =>
+        msgs.map(m => m.id === aiMsgId
+          ? { ...m, text: 'Error connecting to the AI — please try again.' }
+          : m
+        )
+      );
+    }
+    this.cleanupStream();
+  }
+
+  private setStreamingError(aiMsgId: number, errorText: string): void {
+    this.chatMessages.update(msgs =>
+      msgs.map(m => m.id === aiMsgId ? { ...m, text: errorText } : m)
+    );
+    this.cleanupStream();
+  }
+
+  private cleanupStream(): void {
+    if (this.timeoutId !== null) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    this.abortCtrl    = null;
+    this.streamingMsgId = null;
+    this.isStreaming.set(false);
+    this.isTyping.set(false);
+  }
+
+  private async handleClassicResponse(response: Response, aiMsgId: number): Promise<void> {
+    try {
+      const res = await response.json() as { answer: string; timestamp?: string };
+      this.ngZone.run(() => {
+        this.chatMessages.update(msgs =>
+          msgs.map(m => m.id === aiMsgId
+            ? { ...m, text: res.answer, timestamp: res.timestamp ? new Date(res.timestamp) : new Date() }
+            : m
+          )
+        );
+        this.cleanupStream();
+      });
+    } catch {
+      this.ngZone.run(() => this.setStreamingError(aiMsgId, 'Error connecting to the AI — please try again.'));
+    }
   }
 
   onInputKeydown(event: KeyboardEvent): void {
@@ -270,6 +403,16 @@ export class Projects implements OnDestroy {
       event.preventDefault();
       this.sendMessage(this.userInput());
     }
+  }
+
+  private scrollToBottom(): void {
+    // Escapar de la zona y esperar a que Angular dibuje el DOM (el signal update de arriba)
+    setTimeout(() => {
+      const container = this.msgContainerRef()?.nativeElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 10);
   }
 
   private initScrollTrigger(): void {

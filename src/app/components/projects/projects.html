@@ -170,9 +170,10 @@
     </div>
 
     <!-- Messages -->
-    <div class="ai-panel__messages">
-      @for (msg of chatMessages(); track msg.id) {
-        <div class="ai-msg" [class.ai-msg--user]="msg.role === 'user'" [class.ai-msg--ai]="msg.role === 'ai'">
+    <div class="ai-panel__messages" #msgContainer>
+      @for (msg of chatMessages(); track msg.id; let last = $last) {
+        <div class="ai-msg" [class.ai-msg--user]="msg.role === 'user'" [class.ai-msg--ai]="msg.role === 'ai'"
+          [class.ai-msg--streaming]="last && msg.role === 'ai' && isStreaming()">
           @if (msg.role === 'ai') {
             <div class="ai-msg__avatar">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
@@ -218,19 +219,34 @@
         [disabled]="isTyping()"
         autocomplete="off"
       />
-      <button
-        class="ai-panel__send"
-        (click)="sendMessage(userInput())"
-        [disabled]="!userInput().trim() || isTyping()"
-        aria-label="Send"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
+
+      @if (isStreaming()) {
+        <button
+          class="ai-panel__cancel"
+          (click)="cancelStream()"
+          aria-label="Cancel generation"
+          title="Cancel"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+            fill="currentColor" stroke="none">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+          </svg>
+        </button>
+      } @else {
+        <button
+          class="ai-panel__send"
+          (click)="sendMessage(userInput())"
+          [disabled]="!userInput().trim() || isTyping()"
+          aria-label="Send"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      }
     </div>
 
   </div>

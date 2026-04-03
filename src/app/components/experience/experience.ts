@@ -77,7 +77,7 @@ export class Experience implements OnDestroy {
       this.mkLine('dim', 'projects/'),
       this.mkLine('accent', '  angelite-platform/   syncro/'),
       this.mkLine('accent', '  mantecapp/            nexora/'),
-      this.mkLine('accent', '  arcadia-sala-juegos/'),
+      this.mkLine('accent', '  skulls-ecommerce/'),
     ],
     whoami: () => [
       this.mkLine('success', 'tomás fernandez'),
